@@ -4,6 +4,8 @@
 //DEPS com.google.oauth-client:google-oauth-client-jetty:1.23.0
 //DEPS com.google.apis:google-api-services-calendar:v3-rev305-1.23.0
 
+import java.awt.datatransfer.*;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -44,15 +46,14 @@ import picocli.CommandLine.Option;
         description = "jmeet to get a fresh google meet link made with jbang")
 class jmeet implements Callable<Integer> {
 
-    @Option(names={"--credentials"}, defaultValue = "credentials.json")
+    @Option(names={"--credentials"}, defaultValue = "credentials.json", description = "path to credentials")
     private File credentials;
 
-    @Option(names={"-c"}, defaultValue = "primary")
+    @Option(names={"-c"}, defaultValue = "primary", description = "which calendar to use")
     private String calendar;
 
-    @Option(names={"--seed"}, required = false)
-    String seed;
-
+    @Option(names={"-b"}, description = "copy to clipBoard")
+    boolean copyToClipboard;
 
     public static void main(String... args) {
         int exitCode = new CommandLine(new jmeet()).execute(args);
@@ -117,7 +118,7 @@ class jmeet implements Callable<Integer> {
         event.setEnd(end);
 
         event.setConferenceData(new ConferenceData()
-                                .setCreateRequest(new CreateConferenceRequest().setRequestId(seed==null?UUID.randomUUID().toString():seed)));
+                                .setCreateRequest(new CreateConferenceRequest().setRequestId(UUID.randomUUID().toString())));
 
         event = service.events().insert(calendar, event).setConferenceDataVersion(1).execute();
 
@@ -126,12 +127,20 @@ class jmeet implements Callable<Integer> {
         event.getConferenceData().getEntryPoints().forEach(x -> {
             if(x.getEntryPointType().equals("video")){
                 if(x.getUri().startsWith("https://meet.google.com")) {
-                    System.out.println(x.getUri());
+                    if(copyToClipboard){
+                        copyClipboard(x.getUri());
+                    } 
+                  System.out.println(x.getUri());
                 }
-                
             }
         });
 
         return 0;
+    }
+
+    void copyClipboard(String str) {
+             StringSelection stringSelection = new StringSelection(str);
+             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(stringSelection, null);
     }
 }
