@@ -1,0 +1,8 @@
+{
+  "catalogs": {},
+  "aliases": {
+    "jmeet": {
+      "script-ref": "jmeet.java"
+    }
+  }
+}
