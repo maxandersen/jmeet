@@ -1,7 +1,7 @@
 {
   "catalogs": {},
   "aliases": {
-    "jmeet": {
+    "run": {
       "script-ref": "jmeet.java"
     }
   }

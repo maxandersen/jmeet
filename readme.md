@@ -5,5 +5,9 @@ relying on a browser nor custom integration available.
 
 How to run it without anything installed:
 
-    curl -Ls https://sh.jbang.dev | bash -s - jmeet.java
+    curl -Ls https://sh.jbang.dev | bash -s - run@maxandersen/jmeet
+
+If you have [jbang](https://jbang.dev) already installed just do:
+
+    jbang https://github.com/maxandersen/jmeet/blob/master/jmeet.java
 
