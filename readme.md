@@ -9,5 +9,11 @@ How to run it without anything installed:
 
 If you have [jbang](https://jbang.dev) already installed just do:
 
-    jbang https://github.com/maxandersen/jmeet/blob/master/jmeet.java
+    jbang run@maxandersen/jmeet
+
+To install it via jbang do:
+
+    jbang app install --name jmeet run@maxandersen/jmeet
+
+
 
