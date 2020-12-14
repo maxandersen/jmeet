@@ -3,6 +3,9 @@
   "aliases": {
     "run": {
       "script-ref": "jmeet.java"
+    },
+    "clearpto": {
+      "script-ref": "clearpto.java"
     }
   }
 }
