@@ -1,4 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
+//DESCRIPTION clearpto to clear your calendar for a PTO period
 //DEPS info.picocli:picocli:4.5.0
 //DEPS com.google.api-client:google-api-client:1.23.0
 //DEPS com.google.oauth-client:google-oauth-client-jetty:1.23.0
@@ -17,7 +18,9 @@ import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -135,7 +138,9 @@ class clearpto implements Callable<Integer> {
             return ExitCode.USAGE;
         }
 
-        
+        // email to number of events
+        Map<String, Integer> attendees = new HashMap<>();
+
         String pageToken = null;
         do {
             DateTime startDateTime = new DateTime(from);
@@ -162,6 +167,7 @@ class clearpto implements Callable<Integer> {
                             }
                         })
                         .collect(Collectors.toList());
+
             for (Event event : items) {
                 if("cancelled".equals(event.getStatus())) {
                     continue;
@@ -173,6 +179,14 @@ class clearpto implements Callable<Integer> {
                 int guests = event.getAttendees()==null?0:event.getAttendees().size();
                 //System.out.println(event + "\n\n");
 
+                if(event.getAttendees()!=null) {
+                event.getAttendees().forEach(a -> {
+                    if(!a.isSelf()) {
+                        attendees.merge(a.getEmail(), 1, (o,n) -> o == null ? 1 : o+n);
+                    }
+                });
+                }
+            
                 String emsg = String.format("'%s' - '%1.16s' by %s with %d guests", title, desc, who, guests);
                 
                 if(force) {
@@ -195,6 +209,19 @@ class clearpto implements Callable<Integer> {
             
             pageToken = events.getNextPageToken();
         } while (pageToken != null);
+
+        System.out.println("Found " + attendees.size() + " attendees spread over the following domains:");
+        Map<String, Integer> domain = new HashMap<>();
+        attendees.entrySet().stream().sorted(Collections.reverseOrder(Map.Entry.comparingByValue())).forEach(e -> {
+            domain.merge(e.getKey().split("@")[1], 1, (o,n) -> o+n);
+        });
+        domain.entrySet().stream().sorted(Collections.reverseOrder(Map.Entry.comparingByValue())).forEach(e -> {
+            System.out.println(e.getKey() + " " + e.getValue());
+        });
+        if(!force) {
+            System.out.println("To decline these meetings, run with --force");
+        }
+
 
         return 0;
     }

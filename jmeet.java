@@ -83,7 +83,7 @@ class jmeet implements Callable<Integer> {
                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
                 .setAccessType("offline")
                 .build();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8765).build();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
