@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -77,6 +78,9 @@ class clearpto implements Callable<Integer> {
 
     @Option(names = { "--force"}, defaultValue = "false", description = "Set to actually decline/delete")
     boolean force;
+
+    @Option(names = { "--filter"}, description = "Regex to filter events")
+    Pattern filter;
 
     public static void main(String... args) {
         int exitCode = new CommandLine(new clearpto()).execute(args);
@@ -162,6 +166,18 @@ class clearpto implements Callable<Integer> {
                         .filter(e -> {
                             if(e.getAttendees()!=null) {
                                return e.getAttendees().stream().noneMatch(a -> a.isSelf() && "declined".equals(a.getResponseStatus()));
+                            } else {
+                                return true;
+                            }
+                        }).filter(e-> {
+                            if(filter!=null) {
+                                boolean f = filter.matcher(e.getSummary()).find();
+                                if(f) {
+                                    System.out.println("filtering " + e.getSummary());
+                                    return false;
+                                } else {
+                                    return true;
+                                }
                             } else {
                                 return true;
                             }
